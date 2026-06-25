@@ -41,12 +41,12 @@ def test_manifest_artifact_files_exist_and_small_checksums_match():
 def test_chexfound_safetensors_header_is_valid():
     provider = ImageModelScoreProvider(ROOT / "model_bundle")
     status = provider.artifact_status()
-    assert status["chexfound_hf_model_safetensors"]["exists"] is True
     assert status["chexfound_hf_config"]["exists"] is True
     assert status["chexfound_external_code"]["exists"] is True
     assert status["eva_x_external_code"]["exists"] is True
     if os.environ.get("CHECK_LARGE_ARTIFACTS") != "1":
         pytest.skip("Large artifacts are checked only with CHECK_LARGE_ARTIFACTS=1.")
+    assert status["chexfound_hf_model_safetensors"]["exists"] is True
     assert status["eva_x_base_frozen_ood_weights"]["exists"] is True
     assert status["full_image_adapter_wired"] is True
     header = provider.validate_chexfound_safetensors_header()

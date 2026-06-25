@@ -17,6 +17,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 OUT_DIR = ROOT / "release_artifacts"
 VERSION = "v0.1.0"
+SPLIT_SIZE_BYTES = 256 * 1024 * 1024
 
 ARTIFACT_GROUPS: dict[str, list[str]] = {
     f"cxr-triage-eva-artifacts-{VERSION}.tar": [
@@ -64,13 +65,42 @@ def pack_archive(archive_name: str, members: list[str]) -> dict[str, object]:
             tar.add(ROOT / rel, arcname=rel)
 
     size = archive_path.stat().st_size
+    parts = split_archive(archive_path)
     return {
         "path": str(archive_path.relative_to(ROOT)),
         "bytes": size,
         "size": format_size(size),
         "sha256": sha256_file(archive_path),
+        "split_size_bytes": SPLIT_SIZE_BYTES,
+        "parts": parts,
         "members": members,
     }
+
+
+def split_archive(archive_path: Path) -> list[dict[str, object]]:
+    for old_part in OUT_DIR.glob(f"{archive_path.name}.part-*"):
+        old_part.unlink()
+
+    parts: list[dict[str, object]] = []
+    index = 0
+    with archive_path.open("rb") as src:
+        while True:
+            chunk = src.read(SPLIT_SIZE_BYTES)
+            if not chunk:
+                break
+            suffix = chr(ord("a") + index // 26) + chr(ord("a") + index % 26)
+            part_path = OUT_DIR / f"{archive_path.name}.part-{suffix}"
+            part_path.write_bytes(chunk)
+            parts.append(
+                {
+                    "path": str(part_path.relative_to(ROOT)),
+                    "bytes": part_path.stat().st_size,
+                    "size": format_size(part_path.stat().st_size),
+                    "sha256": sha256_file(part_path),
+                }
+            )
+            index += 1
+    return parts
 
 
 def main() -> None:

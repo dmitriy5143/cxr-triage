@@ -10,6 +10,18 @@ Use release artifacts for the backend-ready model bundle:
 - `cxr-triage-chexfound-artifacts-v0.1.0.tar`
 - `model_artifacts_sha256.json`
 
+For GitHub Release upload, the tar files may also be published as split parts:
+
+- `cxr-triage-eva-artifacts-v0.1.0.tar.part-aa`, `.part-ab`, ...
+- `cxr-triage-chexfound-artifacts-v0.1.0.tar.part-aa`, `.part-ab`, ...
+
+Reassemble split artifacts first:
+
+```bash
+cat cxr-triage-eva-artifacts-v0.1.0.tar.part-* > cxr-triage-eva-artifacts-v0.1.0.tar
+cat cxr-triage-chexfound-artifacts-v0.1.0.tar.part-* > cxr-triage-chexfound-artifacts-v0.1.0.tar
+```
+
 Both tar archives are extracted over the repository root:
 
 ```bash

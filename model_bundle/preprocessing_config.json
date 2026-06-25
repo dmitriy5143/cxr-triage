@@ -1,0 +1,11 @@
+{
+  "preprocessing_version": "preproc_v1",
+  "target_contract": "0=no_attention_required; 1=requires_attention; N/A is router output only",
+  "eva_image_size": 224,
+  "feature_extractor_family": "EVA-X",
+  "variant": "base",
+  "model_kind": "partial_unfreeze_e2e",
+  "input_mode": "image_end_to_end",
+  "quality_score_field": "quality_score",
+  "ood_feature_space": "frozen encoder features used during model selection"
+}

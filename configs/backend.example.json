@@ -1,0 +1,10 @@
+{
+  "bundle_dir": "model_bundle",
+  "router_config": "model_bundle/reports/selected_mass_router_config.json",
+  "storage_url": "sqlite:///local_runs/feedback.sqlite",
+  "log_level": "INFO",
+  "api": {
+    "host": "0.0.0.0",
+    "port": 8080
+  }
+}

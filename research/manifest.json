@@ -1,0 +1,135 @@
+{
+  "created_for": "research_transfer_integrity",
+  "files": [
+    {
+      "path": "research/notebooks/fluoro_mvp_model_selection.ipynb",
+      "bytes": 244849,
+      "sha256": "4eec0696c17f7fc9fc259de00cf3d631716832424650e8a8f6fbb9c6ee7e31f8"
+    },
+    {
+      "path": "research/notebooks/fluoro_mvp_ranking_closure.ipynb",
+      "bytes": 240199,
+      "sha256": "4c7fcbba384a07422df67eb7eec9c0a92b7b389439eacc882d27b14dde6d1601"
+    },
+    {
+      "path": "research/notebooks/fluoro_mvp_single_notebook.ipynb",
+      "bytes": 229089,
+      "sha256": "7e991515df1f37a162471c3553151de87eaec81052cef0dd58cd37cec7402bb6"
+    },
+    {
+      "path": "research/notebooks/fluoro_mvp_vindr_interpretation.ipynb",
+      "bytes": 173810,
+      "sha256": "1c3d0f085fd6336c05039ec52fb5cdc7ddf0ae550159fb9b79967cdbbb8e1a3e"
+    },
+    {
+      "path": "research/scripts/automation_frontier_analysis.py",
+      "bytes": 16129,
+      "sha256": "3d6512276793e91ca571dacff6cd02197eb16970100f5719601ef48bb1ac127c"
+    },
+    {
+      "path": "research/scripts/build_fluoro_notebook.py",
+      "bytes": 130452,
+      "sha256": "b614c40e2d200e9a14aed0cff76eee505ea90cb9617b859fadd4ed2dc2a53b36"
+    },
+    {
+      "path": "research/scripts/build_mvp_experiment_notebooks.py",
+      "bytes": 170507,
+      "sha256": "fbba82d7206bb0abc9c10736d68a73bf8d8bca0c4c20b8787b16a179b25b72b8"
+    },
+    {
+      "path": "research/scripts/chexfound_posthoc_and_head_sweep.py",
+      "bytes": 28442,
+      "sha256": "1153fbc92c14ede2ad3c79855025d3e240b1e58d9cbc86432b650dedba784d8f"
+    },
+    {
+      "path": "research/scripts/create_final_docx.py",
+      "bytes": 9477,
+      "sha256": "cfad71d93bc7a434758976ac5fe122e930463ab06a36a23ed2fbf1b63aa7c3d9"
+    },
+    {
+      "path": "research/scripts/deep_ensemble_router_with_lora.py",
+      "bytes": 21483,
+      "sha256": "dd702494ea094ec79a16ba740066a05d4a0e0919c8ef01158f8ef60a0c75948f"
+    },
+    {
+      "path": "research/scripts/deep_router_analysis.py",
+      "bytes": 23611,
+      "sha256": "9c33e9ec7ef1651b359a8a47dba39d1a69c580dcc3fe63f6f7c9b94704a22369"
+    },
+    {
+      "path": "research/scripts/download_vindr_kaggle_subset.py",
+      "bytes": 9480,
+      "sha256": "566ff2dbe2c6510c4134da6776ce501cd48267ec752b795d8f09fe3cb68caf85"
+    },
+    {
+      "path": "research/scripts/eva_hard_case_image_finetune.py",
+      "bytes": 34135,
+      "sha256": "98131004c589e66958e6008cd21d0dcad03bd3da9adf595fc9ab5250ce1c8a4b"
+    },
+    {
+      "path": "research/scripts/export_eva_partial_case_scores.py",
+      "bytes": 12047,
+      "sha256": "7f6a34d53275843a054546e6fc6d022085441f6ec40ab9a702981ef9dd3076fc"
+    },
+    {
+      "path": "research/scripts/fluoro_mvp_core.py",
+      "bytes": 90777,
+      "sha256": "8b202300448cc9dc2c60401d549e9f84039a5cde1231d868e981a47c4ada22b2"
+    },
+    {
+      "path": "research/scripts/hard_case_adapter_experiment.py",
+      "bytes": 11302,
+      "sha256": "bbd47f717a2e802e75bfc3b6d251d751be6be3d9719850caa008e02744d0e293"
+    },
+    {
+      "path": "research/scripts/mass_router_meta_analysis.py",
+      "bytes": 33951,
+      "sha256": "294c37467c82c7b72c2763411fa3fcfda0efda1b1ea3f1943b744ab789ce2b54"
+    },
+    {
+      "path": "research/scripts/near_threshold_data_label_audit.py",
+      "bytes": 14017,
+      "sha256": "81143b980e7a08aeadbac24674aebf4381e8290a63e778d9e40f64d0968cf73e"
+    },
+    {
+      "path": "research/scripts/prepare_ensemble_router_bundle.py",
+      "bytes": 9407,
+      "sha256": "b087262d994cff5a2ebc5844bca235ca663b4dd7597cc874d7a919b7678d4716"
+    },
+    {
+      "path": "research/scripts/prepare_router_workbench.py",
+      "bytes": 9287,
+      "sha256": "2bd968e5cd180888c2a2f09ac9c916dc312bc01287ff83f1c8a6bb5121adc778"
+    },
+    {
+      "path": "research/scripts/prepare_selected_model_workbench.py",
+      "bytes": 18156,
+      "sha256": "6625607902821723009d6b7f7fd2a7b735a04993b443d480ade2909fd8d70c3b"
+    },
+    {
+      "path": "research/scripts/run_chexfound_lora_local.py",
+      "bytes": 31156,
+      "sha256": "fe1a5a89212ba4b3f422dc22469caa2d3c4c72bfc22d283681dea9aa0b592be4"
+    },
+    {
+      "path": "research/scripts/run_model_selection_profile.py",
+      "bytes": 4440,
+      "sha256": "bc8f40c6a3bff5eaa44c9456cfddaa7c08b19177a6d2c3c0ad68421976b38a62"
+    },
+    {
+      "path": "research/scripts/run_vindr_interpretation_local.py",
+      "bytes": 27575,
+      "sha256": "895cac8f8c7477211efc52da716eb1ac050a96dcd7dcb803444dad4987b550de"
+    },
+    {
+      "path": "research/scripts/target_review_scenario_analysis.py",
+      "bytes": 6334,
+      "sha256": "0665481a476e2da0d61e3a33ebb2abd25bad9de1ba277895fac0f10a877cecca"
+    },
+    {
+      "path": "research/scripts/vindr_bbox_auxiliary_training_pilot.py",
+      "bytes": 21532,
+      "sha256": "20ce0da12de326181512499c874b4be3601378807c3cacb28a98cbce525adb47"
+    }
+  ]
+}

@@ -1,0 +1,21 @@
+__pycache__/
+.pytest_cache/
+.venv/
+*.pyc
+*.sqlite
+*.db
+*.zip
+*.tar
+*.tar.gz
+local_runs/
+tmp/
+*.log
+
+# Heavy model artifacts are distributed through Git LFS or release artifacts,
+# not regular git blobs.
+model_bundle/**/*.pt
+model_bundle/**/*.pth
+model_bundle/**/*.pkl
+model_bundle/**/*.safetensors
+model_bundle/**/*.onnx
+release_artifacts/

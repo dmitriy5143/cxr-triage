@@ -1,0 +1,267 @@
+{
+  "project": "fluoro_mvp_mass_router_deployment_candidate",
+  "candidate_role": "deployment_style_router_candidate",
+  "deployment_ready_for_backend_adapter": true,
+  "why_not_direct_backend_ready": "Direct backend image inference is now implemented. Remaining hardening is customer-local validation plus production observability, not model-bundle wiring.",
+  "router_summary": {
+    "rule": "pair_one_low_other_veto",
+    "models": [
+      "chexfound_frozen_tuned_head",
+      "eva_x_base_partial_unfreeze_last1"
+    ],
+    "final_auto_negative_coverage": 0.09952229299363058,
+    "final_selected_count": 125,
+    "final_FN_count": 0,
+    "final_NPV": 1.0,
+    "final_NPV_ci95_low": 0.9701835432034374
+  },
+  "files": {
+    "eva_last1_checkpoint": {
+      "src": "selected_model_workbench/router_workbench/ensemble_candidate_bundle/models/base_unfreeze_last1_e150_best.pt",
+      "dst": "selected_model_workbench/mass_router_meta_analysis/deployment_candidate_bundle/models/eva_base_partial_unfreeze_last1_best.pt",
+      "mode": "hardlink",
+      "bytes": 346955507
+    },
+    "eva_last1_calibrator": {
+      "src": "selected_model_workbench/router_workbench/ensemble_candidate_bundle/calibration/last1_calibrator.pkl",
+      "dst": "selected_model_workbench/mass_router_meta_analysis/deployment_candidate_bundle/calibration/eva_last1_calibrator.pkl",
+      "mode": "hardlink",
+      "bytes": 4257
+    },
+    "eva_ood_model": {
+      "src": "selected_model_workbench/router_workbench/ensemble_candidate_bundle/best_ood_model.pkl",
+      "dst": "selected_model_workbench/mass_router_meta_analysis/deployment_candidate_bundle/calibration/eva_ood_model.pkl",
+      "mode": "hardlink",
+      "bytes": 24830700
+    },
+    "chexfound_head": {
+      "src": "CheXFound_frozen/posthoc_head_sweep_workbench/head_models/h512_do20_lr8e4_wd1e4.pt",
+      "dst": "selected_model_workbench/mass_router_meta_analysis/deployment_candidate_bundle/models/chexfound_frozen_head_h512_do20_lr8e4_wd1e4.pt",
+      "mode": "hardlink",
+      "bytes": 10946385
+    },
+    "chexfound_head_calibrator": {
+      "src": "CheXFound_frozen/posthoc_head_sweep_workbench/head_models/h512_do20_lr8e4_wd1e4_platt_calibrator.pkl",
+      "dst": "selected_model_workbench/mass_router_meta_analysis/deployment_candidate_bundle/calibration/chexfound_head_platt_calibrator.pkl",
+      "mode": "hardlink",
+      "bytes": 954
+    },
+    "chexfound_ood_model": {
+      "src": "CheXFound_frozen/best_ood_model.pkl",
+      "dst": "selected_model_workbench/mass_router_meta_analysis/deployment_candidate_bundle/calibration/chexfound_ood_model.pkl",
+      "mode": "hardlink",
+      "bytes": 159597316
+    },
+    "preprocessing_config": {
+      "src": "selected_model_workbench/router_workbench/ensemble_candidate_bundle/preprocessing_config.json",
+      "dst": "selected_model_workbench/mass_router_meta_analysis/deployment_candidate_bundle/preprocessing_config.json",
+      "mode": "hardlink",
+      "bytes": 421
+    },
+    "chexfound_hf_snapshot": {
+      "repo_id": "DIAL-RPI/CheXFound",
+      "revision": "41b966c3d4fcd2c9b5c8bd760f2df17a7b569dd3",
+      "source": "https://huggingface.co/DIAL-RPI/CheXFound",
+      "files": {
+        "chexfound_hf_model_safetensors": "model_bundle/external/chexfound_hf/model.safetensors",
+        "chexfound_hf_config": "model_bundle/external/chexfound_hf/config.json",
+        "chexfound_hf_readme": "model_bundle/external/chexfound_hf/README.md"
+      }
+    },
+    "eva_x_source_snapshot": {
+      "source": "https://github.com/hustvl/EVA-X",
+      "path": "model_bundle/external/EVA-X",
+      "key_files": {
+        "eva_x_py": "model_bundle/external/EVA-X/eva_x.py",
+        "license": "model_bundle/external/EVA-X/LICENSE.txt",
+        "readme": "model_bundle/external/EVA-X/README.md"
+      }
+    },
+    "chexfound_source_snapshot": {
+      "source": "https://github.com/RPIDIAL/CheXFound",
+      "path": "model_bundle/external/CheXFound",
+      "key_files": {
+        "vision_transformer": "model_bundle/external/CheXFound/chexfound/models/vision_transformer.py",
+        "license": "model_bundle/external/CheXFound/LICENSE",
+        "readme": "model_bundle/external/CheXFound/README.md"
+      }
+    },
+    "eva_x_base_frozen_ood_weights": {
+      "source": "MapleF/eva_x",
+      "filename": "eva_x_base_patch16_merged520k_mim.pt",
+      "path": "model_bundle/models/eva_x/eva_x_base_patch16_merged520k_mim.pt",
+      "purpose": "frozen EVA-X-B feature space for the deployed EVA OOD gate"
+    }
+  },
+  "router_config_file": "reports/selected_mass_router_config.json",
+  "created_from": "selected_model_workbench/mass_router_meta_analysis",
+  "delivery_bundle_version": "2026-06-24-v1",
+  "delivery_bundle_role": "backend_ready_candidate_bundle",
+  "primary_candidate": "ensemble_chexfound_head_plus_eva_x_base_last1_router",
+  "single_model_candidates": [
+    "eva_x_base_partial_unfreeze_last1",
+    "chexfound_frozen_tuned_head_h512_do20_lr8e4_wd1e4"
+  ],
+  "artifact_checksums": [
+    {
+      "path": "model_bundle/calibration/chexfound_head_platt_calibrator.pkl",
+      "bytes": 954,
+      "sha256": "b5767af0bcee0f0bdccf12d641e0a485aa13ccd81007b971fcf8311bfd2651d0"
+    },
+    {
+      "path": "model_bundle/calibration/chexfound_ood_model.pkl",
+      "bytes": 159597316,
+      "sha256": "f110db69466c857f948083335ed0c1b3e56f7ab7646ab84a90f8992a0c9806d6"
+    },
+    {
+      "path": "model_bundle/calibration/eva_last1_calibrator.pkl",
+      "bytes": 4257,
+      "sha256": "101fd94ce9cc6be085cd49a9613bc5c296953d73981e2805dcafbbc3d71a9bd0"
+    },
+    {
+      "path": "model_bundle/calibration/eva_ood_model.pkl",
+      "bytes": 24830700,
+      "sha256": "64b28dfb33330f223cc22081a752fc4752370e1faeb6cc7a9d519d24dbf729b1"
+    },
+    {
+      "path": "model_bundle/external/CheXFound/LICENSE",
+      "bytes": 1090,
+      "sha256": "17fb57c9945f7d730cb17de208467b997232ff4a124c82817650c49899e999dc"
+    },
+    {
+      "path": "model_bundle/external/CheXFound/README.md",
+      "bytes": 6376,
+      "sha256": "1fa72d55b44b08dfd9c99e0a7160ba7f91605756941c7ae8e40bc06340c54cba"
+    },
+    {
+      "path": "model_bundle/external/CheXFound/chexfound/models/vision_transformer.py",
+      "bytes": 15300,
+      "sha256": "ad51879e34fc8acf0eecf22e92fbdf2fa740cf695c9cd304d8b550483d9bbb01"
+    },
+    {
+      "path": "model_bundle/external/EVA-X/LICENSE.txt",
+      "bytes": 11348,
+      "sha256": "760939b000194d04548ede6a857bbe735d1695d8422ec85955c8e2bd7f4b95c5"
+    },
+    {
+      "path": "model_bundle/external/EVA-X/README.md",
+      "bytes": 6500,
+      "sha256": "04961ea78638d095c8647bc0059c0f6943c76aa86a235134fd924949f3620777"
+    },
+    {
+      "path": "model_bundle/external/EVA-X/eva_x.py",
+      "bytes": 6176,
+      "sha256": "5c21eb02cd977c35d4b8cf2984081b88b73db49953c1b4c2235f30df29df8219"
+    },
+    {
+      "path": "model_bundle/external/chexfound_hf/README.md",
+      "bytes": 31,
+      "sha256": "4bcf87ecfbbb8e07a01b21415a970c8b53a5283bf6872b657040d3f45c9241f7"
+    },
+    {
+      "path": "model_bundle/external/chexfound_hf/config.json",
+      "bytes": 385,
+      "sha256": "4c2c3a9d7d4b83aee13761bf7a9c4d52c71d83dffc1e86037a4c648e1dcef90e"
+    },
+    {
+      "path": "model_bundle/external/chexfound_hf/model.safetensors",
+      "bytes": 1218554624,
+      "sha256": "852072c47ac300099363d0c756c15587373cd94320b74381657510ac301cb623"
+    },
+    {
+      "path": "model_bundle/models/chexfound_frozen_head_h512_do20_lr8e4_wd1e4.pt",
+      "bytes": 10946385,
+      "sha256": "be607896867560efadf62760e270c5fe43094ca0350129a3b915754c8a0411cf"
+    },
+    {
+      "path": "model_bundle/models/eva_base_partial_unfreeze_last1_best.pt",
+      "bytes": 346955507,
+      "sha256": "1f79c03c48adb79ec82eb16c47a02db892fdfb5fef6ff497707af7efb0adc490"
+    },
+    {
+      "path": "model_bundle/models/eva_x/eva_x_base_patch16_merged520k_mim.pt",
+      "bytes": 1210286919,
+      "sha256": "35dc7012c1a49cba01f5a31a8d777db39258078c85cfad3f3c9a41deb172e1b4"
+    },
+    {
+      "path": "model_bundle/preprocessing_config.json",
+      "bytes": 421,
+      "sha256": "2759250d83f483e535cd19b1ce52d5a3f1e27205c49339b782ddffb0ff52d299"
+    },
+    {
+      "path": "model_bundle/reports/chexfound_candidate_fixed_final.csv",
+      "bytes": 30724,
+      "sha256": "0c553683fddf526c6497474812f7d8d4d4e1df2ddfbc933280825fb4b7066861"
+    },
+    {
+      "path": "model_bundle/reports/eva_last1_candidate_fixed_metrics.csv",
+      "bytes": 1793,
+      "sha256": "61bc9708aad8cab7a305a502e5cc5e8780876293106e9e9f511a043240d06a48"
+    },
+    {
+      "path": "model_bundle/reports/final_safe_from_validation_candidates.csv",
+      "bytes": 4064,
+      "sha256": "e4a8a12710ad7c451b4cc02c73ad1d2a7341a32dac8555325fdcdc7c43c175f5"
+    },
+    {
+      "path": "model_bundle/reports/input_scores_final_test.csv",
+      "bytes": 817065,
+      "sha256": "4d8bcc22bc7874fdc0cc2ef27de002ae16c9ae7df976e86a50fc92a9a02ea73c"
+    },
+    {
+      "path": "model_bundle/reports/input_scores_validation.csv",
+      "bytes": 816690,
+      "sha256": "8513ba00e241a07d15c25fa21ff114927b733aa16783b6edd5f9ef3bcafed260"
+    },
+    {
+      "path": "model_bundle/reports/mass_router_meta_analysis_report.md",
+      "bytes": 13762,
+      "sha256": "cb40024cdd2f5f6d0a5a7632b4d093abeabe631b5b035fa5fb64fda5c9c78014"
+    },
+    {
+      "path": "model_bundle/reports/mass_router_meta_analysis_summary_ru.md",
+      "bytes": 4831,
+      "sha256": "dcc63f080c497f830a067099c172d610abeaf694b304f262d2aaafa13b4cb7db"
+    },
+    {
+      "path": "model_bundle/reports/router_blocker_summary_final_test.csv",
+      "bytes": 306,
+      "sha256": "4d217da31d839997f7f44c8594ba125e3c3e2a616b2190ea86423936224b7313"
+    },
+    {
+      "path": "model_bundle/reports/selected_mass_router_config.json",
+      "bytes": 3897,
+      "sha256": "c9ff22f05a8866d5b3bbaea64896df09efc3a63766874a5198c4468c5583473d"
+    },
+    {
+      "path": "model_bundle/reports/selected_routes_final_test.csv",
+      "bytes": 296959,
+      "sha256": "c9042fc1d4473a8705a95c8e489e308451b1e78a6a7425d2996b970d72f08574"
+    },
+    {
+      "path": "model_bundle/reports/selected_routes_validation.csv",
+      "bytes": 296612,
+      "sha256": "1e508ae0b1ea74176dfff1ebd4e81188218ca910921ffabdcd8885ef8bbd494d"
+    },
+    {
+      "path": "model_bundle/reports/target_review_candidates.csv",
+      "bytes": 5334,
+      "sha256": "c38d369e469af20f9b83472cbfad2247bf677279ef7911e45ad307929ab1c691"
+    },
+    {
+      "path": "model_bundle/reports/target_review_scenarios.csv",
+      "bytes": 937,
+      "sha256": "07f3e4960cb4d9576a8a2848ac0d136f957d8d03fde32a077283c5174924c5a5"
+    }
+  ],
+  "chexfound_backbone_included": true,
+  "chexfound_hf_revision": "41b966c3d4fcd2c9b5c8bd760f2df17a7b569dd3",
+  "full_image_adapter_included": true,
+  "full_image_adapter_entrypoints": {
+    "provider": "fluoro_mvp_backend.inference.ImageModelScoreProvider",
+    "cli": "python3 -m fluoro_mvp_backend.cli --bundle model_bundle --image /path/to/image.png --pretty",
+    "smoke": "python3 tools/image_inference_smoke.py",
+    "real_data_parity_smoke": "python3 tools/real_data_parity_smoke.py --data-root ../data/incxr_png/IN-CXR\\ \\(pre-processed\\)"
+  },
+  "backend_adapter_status": "Full image adapter implemented and parity-smoked on local IN-CXR sample; customer-local validation remains before clinical rollout."
+}

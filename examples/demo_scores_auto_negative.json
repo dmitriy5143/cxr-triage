@@ -1,0 +1,12 @@
+{
+  "study_id": "c274221ff973908c",
+  "p_chex_head": 0.011421446,
+  "p_last1": 0.0026976380031555,
+  "quality_score": 0.75,
+  "ood_score_chex": 0.5874024805978868,
+  "ood_score_eva": 0.6479324017958696,
+  "critical_qa_bool": false,
+  "uncertainty_core_max": 0.022842892,
+  "y_attention": 0,
+  "image_file": "011ac41330df0111543a148cc90c1701_Normal.png"
+}

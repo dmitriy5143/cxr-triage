@@ -1,0 +1,14 @@
+{
+  "architectures": [
+    "CheXFound"
+  ],
+  "config_file": "/fast/yangz16/outputs/cxr-million/vit_large_outputs/ibot333_highres512/config_interp.yaml",
+  "model_type": "CheXFound",
+  "opts": [
+    "train.output_dir=/fast/yangz16/CheXFound"
+  ],
+  "output_dir": "/fast/yangz16/CheXFound",
+  "pretrained_weights": null,
+  "torch_dtype": "float32",
+  "transformers_version": "4.47.0"
+}

@@ -87,7 +87,7 @@ class ImageModelScoreProvider:
             "router_config": _file_status(self.bundle_dir / "reports" / "selected_mass_router_config.json"),
         }
         status["full_image_adapter_wired"] = all(item["exists"] for item in status.values() if isinstance(item, dict))
-        status["ready_for_score_router"] = all(item["exists"] for item in status.values() if isinstance(item, dict))
+        status["ready_for_score_router"] = status["router_config"]["exists"]
         return status
 
     def validate_chexfound_safetensors_header(self) -> dict[str, Any]:

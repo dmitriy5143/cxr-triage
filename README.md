@@ -49,6 +49,14 @@ cd fluoro_mvp_delivery
 python3 -m pytest
 ```
 
+The default test suite validates the code and score-router path. After
+extracting release artifacts, run the full artifact check:
+
+```bash
+cd fluoro_mvp_delivery
+CHECK_LARGE_ARTIFACTS=1 PYTHONPATH=src python3 -m pytest tests/test_artifact_integrity.py
+```
+
 Run CLI inference on a saved demo score payload:
 
 ```bash

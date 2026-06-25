@@ -1,4 +1,5 @@
 import json
+import os
 from pathlib import Path
 
 from fastapi.testclient import TestClient
@@ -21,12 +22,15 @@ def test_api_prediction_feedback_and_training_flow(tmp_path):
     artifacts = client.get("/model/artifacts")
     assert artifacts.status_code == 200
     artifact_status = artifacts.json()["artifacts"]
-    assert artifact_status["chexfound_hf_model_safetensors"]["exists"] is True
-    assert artifact_status["eva_x_base_last1_checkpoint"]["exists"] is True
-    assert artifact_status["eva_x_base_frozen_ood_weights"]["exists"] is True
+    assert artifact_status["router_config"]["exists"] is True
     assert artifact_status["chexfound_external_code"]["exists"] is True
     assert artifact_status["eva_x_external_code"]["exists"] is True
-    assert artifact_status["full_image_adapter_wired"] is True
+    assert artifact_status["ready_for_score_router"] is True
+    if os.environ.get("CHECK_LARGE_ARTIFACTS") == "1":
+        assert artifact_status["chexfound_hf_model_safetensors"]["exists"] is True
+        assert artifact_status["eva_x_base_last1_checkpoint"]["exists"] is True
+        assert artifact_status["eva_x_base_frozen_ood_weights"]["exists"] is True
+        assert artifact_status["full_image_adapter_wired"] is True
 
     scores = json.loads((ROOT / "examples" / "demo_scores_auto_negative.json").read_text(encoding="utf-8"))
     pred = client.post("/predict-scores", json={"scores": scores})

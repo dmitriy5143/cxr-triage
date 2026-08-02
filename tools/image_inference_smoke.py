@@ -40,6 +40,9 @@ def main() -> int:
     assert 0.0 <= float(scored["scores"]["p_chex_head"]) <= 1.0
     assert 0.0 <= float(scored["scores"]["p_last1"]) <= 1.0
     assert decision["route"] in {"no_attention_required", "N/A", "requires_attention"}
+    if not scored["scores"].get("ood_release_gate_passed", True):
+        assert decision["route"] == "N/A"
+        assert decision["reason"] == "target_site_ood_not_validated"
     image_path.unlink(missing_ok=True)
     print("OK")
     return 0

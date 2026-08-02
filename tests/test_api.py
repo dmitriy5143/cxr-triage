@@ -18,6 +18,8 @@ def test_api_prediction_feedback_and_training_flow(tmp_path):
     health = client.get("/health")
     assert health.status_code == 200
     assert health.json()["status"] == "ok"
+    assert health.json()["clinical_auto_negative_ready"] is False
+    assert health.json()["automatic_retraining_enabled"] is False
 
     artifacts = client.get("/model/artifacts")
     assert artifacts.status_code == 200
@@ -26,6 +28,8 @@ def test_api_prediction_feedback_and_training_flow(tmp_path):
     assert artifact_status["chexfound_external_code"]["exists"] is True
     assert artifact_status["eva_x_external_code"]["exists"] is True
     assert artifact_status["ready_for_score_router"] is True
+    assert artifact_status["clinical_auto_negative_ready"] is False
+    assert artifact_status["ood_profile"]["status"] == "reference_only_target_site_validation_required"
     if os.environ.get("CHECK_LARGE_ARTIFACTS") == "1":
         assert artifact_status["chexfound_hf_model_safetensors"]["exists"] is True
         assert artifact_status["eva_x_base_last1_checkpoint"]["exists"] is True
@@ -36,7 +40,8 @@ def test_api_prediction_feedback_and_training_flow(tmp_path):
     pred = client.post("/predict-scores", json={"scores": scores})
     assert pred.status_code == 200
     pred_body = pred.json()
-    assert pred_body["route"] == "no_attention_required"
+    assert pred_body["route"] == "N/A"
+    assert pred_body["reason"] == "target_site_ood_not_validated"
     assert pred_body["prediction_id"] > 0
 
     feedback = client.post(
@@ -66,10 +71,16 @@ def test_api_prediction_feedback_and_training_flow(tmp_path):
     )
     assert run.status_code == 200
     assert run.json()["training_run_id"] > 0
+    assert run.json()["automatic_execution"] is False
 
     runs = client.get("/training-runs")
     assert runs.status_code == 200
     assert runs.json()["items"][0]["run_name"] == "scheduled-refresh"
+
+    retraining = client.get("/retraining/status")
+    assert retraining.status_code == 200
+    assert retraining.json()["automatic_retraining_enabled"] is False
+    assert retraining.json()["feedback_collection_enabled"] is True
 
 
 def test_predict_image_endpoint_reports_missing_image_without_loading_models(tmp_path):
@@ -110,3 +121,24 @@ def test_predict_image_endpoint_routes_scored_image_payload(tmp_path, monkeypatc
     assert body["route"] == "no_attention_required"
     assert body["scores"]["p_chex_head"] == demo_scores["p_chex_head"]
     assert body["prediction_id"] > 0
+
+
+def test_image_score_payload_fails_closed_without_site_ood_approval(tmp_path, monkeypatch):
+    demo_scores = json.loads((ROOT / "examples" / "demo_scores_auto_negative.json").read_text(encoding="utf-8"))
+    demo_scores["ood_release_gate_passed"] = False
+
+    def fake_score_image_with_metadata(self, image_path):
+        return {"scores": demo_scores, "preprocessing": {"ood_profile": {"status": "reference_only"}}}
+
+    monkeypatch.setattr(
+        api_module.ImageModelScoreProvider,
+        "score_image_with_metadata",
+        fake_score_image_with_metadata,
+    )
+    image_path = tmp_path / "demo.png"
+    image_path.write_bytes(b"placeholder")
+    client = TestClient(create_app(ROOT / "model_bundle", db_path=tmp_path / "api.sqlite"))
+    response = client.post("/predict-image", json={"image_path": str(image_path)})
+    assert response.status_code == 200
+    assert response.json()["route"] == "N/A"
+    assert response.json()["reason"] == "target_site_ood_not_validated"

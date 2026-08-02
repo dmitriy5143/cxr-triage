@@ -16,21 +16,25 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 OUT_DIR = ROOT / "release_artifacts"
-VERSION = "v0.1.0"
+VERSION = "v0.2.0"
 SPLIT_SIZE_BYTES = 256 * 1024 * 1024
 
 ARTIFACT_GROUPS: dict[str, list[str]] = {
     f"cxr-triage-eva-artifacts-{VERSION}.tar": [
         "model_bundle/models/eva_base_partial_unfreeze_last1_best.pt",
         "model_bundle/models/eva_x/eva_x_base_patch16_merged520k_mim.pt",
-        "model_bundle/calibration/eva_last1_calibrator.pkl",
+        "model_bundle/calibration/eva_last1_calibrator.json",
         "model_bundle/calibration/eva_ood_model.pkl",
+        "model_bundle/calibration/ood_artifact_metadata.json",
+        "model_bundle/calibration/site_ood_policy.json",
     ],
     f"cxr-triage-chexfound-artifacts-{VERSION}.tar": [
         "model_bundle/external/chexfound_hf/model.safetensors",
         "model_bundle/models/chexfound_frozen_head_h512_do20_lr8e4_wd1e4.pt",
-        "model_bundle/calibration/chexfound_head_platt_calibrator.pkl",
+        "model_bundle/calibration/chexfound_head_platt_calibrator.json",
         "model_bundle/calibration/chexfound_ood_model.pkl",
+        "model_bundle/calibration/ood_artifact_metadata.json",
+        "model_bundle/calibration/site_ood_policy.json",
     ],
 }
 

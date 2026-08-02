@@ -6,6 +6,7 @@ from typing import Any
 
 from .active_learning import load_review_candidates, select_review_batch
 from .inference import ImageModelScoreProvider, predict_from_scores
+from .ood import ood_profile_status
 from .storage import FeedbackStore
 
 
@@ -31,7 +32,7 @@ class FeedbackRequest(BaseModel):  # type: ignore[misc]
 class TrainingRunRequest(BaseModel):  # type: ignore[misc]
     run_name: str
     config: dict[str, Any]
-    status: str = "planned"
+    status: str = "legal_review_required"
 
 
 class ImagePredictionRequest(BaseModel):  # type: ignore[misc]
@@ -47,11 +48,19 @@ def create_app(bundle_dir: str | Path | None = None, db_path: str | Path | None 
     bundle = Path(bundle_dir or os.environ.get("FLUORO_BUNDLE_DIR", "model_bundle"))
     store = FeedbackStore(db_path or os.environ.get("FLUORO_DB_PATH") or bundle.parent / "feedback.sqlite")
     image_provider = ImageModelScoreProvider(bundle)
-    app = FastAPI(title="Fluoro MVP Backend", version="0.1.0")
+    app = FastAPI(title="Fluoro MVP Backend", version="0.2.0")
 
     @app.get("/health")
     def health() -> dict[str, Any]:
-        return {"status": "ok", "bundle_dir": str(bundle), "db_path": str(store.db_path)}
+        profile = ood_profile_status(bundle)
+        return {
+            "status": "ok",
+            "bundle_dir": str(bundle),
+            "db_path": str(store.db_path),
+            "clinical_auto_negative_ready": profile["clinical_auto_negative_ready"],
+            "ood_profile_id": profile["profile_id"],
+            "automatic_retraining_enabled": False,
+        }
 
     @app.get("/model/artifacts")
     def model_artifacts() -> dict[str, Any]:
@@ -59,8 +68,13 @@ def create_app(bundle_dir: str | Path | None = None, db_path: str | Path | None 
 
     @app.post("/predict-scores")
     def predict_scores(request: ScoreRequest) -> dict[str, Any]:
-        decision = predict_from_scores(request.scores, bundle)
-        prediction_id = store.log_prediction(request.scores, decision)
+        scores = dict(request.scores)
+        profile = ood_profile_status(bundle)
+        research_override = os.environ.get("FLUORO_ALLOW_REFERENCE_OOD_FOR_RESEARCH", "0") == "1"
+        scores["ood_release_gate_passed"] = bool(profile["target_site_validated"] or research_override)
+        scores["ood_profile_id"] = profile["profile_id"]
+        decision = predict_from_scores(scores, bundle)
+        prediction_id = store.log_prediction(scores, decision)
         decision["prediction_id"] = prediction_id
         return decision
 
@@ -112,7 +126,21 @@ def create_app(bundle_dir: str | Path | None = None, db_path: str | Path | None 
             config=request.config,
             status=request.status,
         )
-        return {"training_run_id": run_id, "status": "stored"}
+        return {
+            "training_run_id": run_id,
+            "status": "stored",
+            "automatic_execution": False,
+            "policy": "manual_record_only_pending_legal_and_clinical_governance",
+        }
+
+    @app.get("/retraining/status")
+    def retraining_status() -> dict[str, Any]:
+        return {
+            "automatic_retraining_enabled": False,
+            "execution_mode": "disabled_pending_legal_and_clinical_governance",
+            "feedback_collection_enabled": True,
+            "training_run_records_enabled": True,
+        }
 
     @app.get("/training-runs")
     def training_runs(limit: int = 100) -> dict[str, Any]:

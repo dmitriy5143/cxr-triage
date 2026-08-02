@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import sys
 from pathlib import Path
 
@@ -52,6 +53,7 @@ def main() -> int:
     if sample.empty:
         raise RuntimeError("No final-test rows were selected for parity smoke.")
 
+    os.environ["FLUORO_ALLOW_REFERENCE_OOD_FOR_RESEARCH"] = "1"
     provider = ImageModelScoreProvider(bundle)
     rows: list[dict[str, object]] = []
     for _, row in sample.iterrows():

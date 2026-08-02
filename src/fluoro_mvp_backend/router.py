@@ -78,6 +78,14 @@ def route_record(record: dict[str, Any], config: dict[str, Any]) -> RouteDecisio
     critical_qa = _as_bool(_field(record, "critical_qa_bool", _field(record, "critical_qa", False)))
     uncertainty = _uncertainty(record, model_a, model_b)
 
+    if "ood_release_gate_passed" in record and not _as_bool(record["ood_release_gate_passed"]):
+        return RouteDecision(
+            MANUAL_REVIEW,
+            "target_site_ood_not_validated",
+            p_requires_attention,
+            False,
+            thresholds,
+        )
     if critical_qa:
         return RouteDecision(MANUAL_REVIEW, "critical_qa", p_requires_attention, False, thresholds)
     if quality_score < t_quality:

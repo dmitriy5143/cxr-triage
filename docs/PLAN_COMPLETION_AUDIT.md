@@ -26,8 +26,8 @@ It now includes the direct image scorer adapter that wires preprocessing into bo
 | API endpoints | Done and tested | `src/fluoro_mvp_backend/api.py`, `tests/test_api.py` |
 | Logging/storage | Done and tested | `src/fluoro_mvp_backend/storage.py`, SQLite schema |
 | Review feedback storage | Done and tested | `/review-feedback`, `review_feedback` table |
-| Active learning backend contour | Done as bookkeeping + review queue helpers | `src/fluoro_mvp_backend/active_learning.py` |
-| Scheduled retraining bookkeeping | Done | `training_runs` table and API endpoints |
+| Review/active-learning data contour | Done as feedback storage + review queue helpers | `src/fluoro_mvp_backend/active_learning.py` |
+| Automatic/scheduled retraining | Intentionally disabled | `/retraining/status`, legal and clinical governance required |
 | Research code transfer | Done | copied notebooks/scripts match originals byte-for-byte |
 | Model card / MVP report | Done | `docs/MODEL_CARD.md`, `docs/MVP_REPORT.md` |
 | Fresh environment smoke test | Done | `tools/fresh_env_smoke.py` |
@@ -52,6 +52,7 @@ The backend router reproduces the final-test research output:
 Before an image-upload backend can be called production-complete in a customer environment, add:
 
 1. Customer-local data validation before clinical rollout.
-2. Production observability: latency, memory, OOD-rate, route distribution, and reviewer disagreement dashboards.
+2. Fit and approve a clinic/device-local OOD profile; the bundled profile is IN-CXR reference-only.
+3. Production observability: latency, memory, OOD-rate, route distribution, and reviewer disagreement dashboards.
 
 The current code deliberately does not provide a fake fallback for model scores. `/model/artifacts` reports artifact presence, and `/predict-image` uses the packaged EVA-X-B and CheXFound artifacts.

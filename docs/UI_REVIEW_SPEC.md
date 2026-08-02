@@ -111,9 +111,14 @@ Displayed columns:
 - route blocker count;
 - current label if available.
 
-### 4. Training Runs
+### 4. Training Run Records
 
-Purpose: track periodic model refresh attempts.
+This view is audit-only in the current release. It must not expose a button that
+starts or schedules training. Automatic retraining remains disabled pending
+legal and clinical governance.
+
+Purpose: keep an audit trail of historical or separately authorized manual
+model-refresh work.
 
 Backend calls:
 
@@ -123,7 +128,7 @@ Backend calls:
 Run fields:
 
 - run name;
-- status: planned, running, failed, complete;
+- status: legal review required, blocked, failed, complete;
 - config;
 - metrics;
 - artifact URI;

@@ -18,6 +18,8 @@
    - Apply `selected_mass_router_config.json`.
    - Return route, reason, score, and thresholds.
    - Keep route behavior covered by regression tests.
+   - Fail closed to `N/A` until a target-site OOD profile is approved. This
+     applies to both `/predict-image` and `/predict-scores`.
 
 4. API
    - `/health`
@@ -29,6 +31,7 @@
    - `/predictions`
    - `/review-candidates`
    - `/training-runs`
+   - `/retraining/status`
 
 5. Logging and storage
    - Store every prediction payload.
@@ -42,8 +45,9 @@
 
 7. Active learning
    - Select near-boundary and blocked cases.
-   - Track training runs.
-   - Schedule retraining only after enough reviewed cases arrive.
+   - Store review feedback and manual training-run records.
+   - Automatic/scheduled retraining is disabled pending Russian legal review,
+     clinical governance, and an approved retraining protocol.
 
 ## Required Tests Before Backend MVP
 
@@ -58,4 +62,4 @@
 
 ## Current Boundary
 
-This package already covers router, CLI, API, full image scorer loading, real-data image parity smoke, logging, feedback storage, and active-learning bookkeeping. The remaining production hardening work is customer-local validation and production observability: latency, memory, OOD-rate, route distribution, and reviewer disagreement monitoring.
+This package covers router, CLI, API, full image scorer loading, real-data image parity smoke, logging, feedback storage, and review-queue bookkeeping. The remaining clinical deployment gates are customer-local validation, an approved site OOD profile, and production observability: latency, memory, OOD-rate, route distribution, and reviewer disagreement monitoring.

@@ -1,0 +1,46 @@
+{
+  "calibrators": [
+    {
+      "max_abs_delta": 5.960464477539063e-08,
+      "source": "chexfound_head_platt_calibrator.pkl",
+      "target": "chexfound_head_platt_calibrator.json"
+    },
+    {
+      "max_abs_delta": 5.960464477539063e-08,
+      "source": "eva_last1_calibrator.pkl",
+      "target": "eva_last1_calibrator.json"
+    }
+  ],
+  "ood_models": [
+    {
+      "feature_dim": 5120,
+      "gate": 1.1,
+      "gate_decision_changes": 0,
+      "max_abs_delta": 5.069754072106747e-08,
+      "mean_abs_delta": 3.4309641345255274e-10,
+      "source": "chexfound_ood_model.pkl",
+      "target": "chexfound_ood_model.pkl",
+      "training_rows": 7534,
+      "validation_rows": 1256
+    },
+    {
+      "feature_dim": 768,
+      "gate": 1.25,
+      "gate_decision_changes": 0,
+      "max_abs_delta": 0.0,
+      "mean_abs_delta": 0.0,
+      "source": "eva_ood_model.pkl",
+      "target": "eva_ood_model.pkl",
+      "training_rows": 7534,
+      "validation_rows": 1256
+    }
+  ],
+  "policy": "Exact split-preserving refit; release is blocked on score/gate parity failure.",
+  "runtime": {
+    "joblib": "1.5.3",
+    "numpy": "2.0.2",
+    "python": "3.11.9",
+    "scikit_learn": "1.8.0"
+  },
+  "schema_version": 1
+}

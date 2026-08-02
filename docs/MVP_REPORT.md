@@ -42,7 +42,7 @@ The case is auto-cleared only when one signal is very confidently low-risk and t
 The delivery package contains:
 
 - selected model artifacts;
-- calibrators and OOD models;
+- version-neutral calibrators and scikit-learn 1.8.0 OOD models;
 - preprocessing config;
 - router config;
 - metric reports;
@@ -50,9 +50,12 @@ The delivery package contains:
 - CLI demo;
 - API with score and full-image inference;
 - storage for predictions and review feedback;
-- active-learning training-run bookkeeping;
+- review feedback and manual training-run bookkeeping;
 - regression tests that prevent drift from research metrics.
 
 ## Next Product Step
 
-Validate on customer-local data with the same locked router protocol. Review feedback should be stored from day one so the model can be refreshed on real product data.
+Validate on customer-local data with the same locked router protocol and fit a
+device/clinic-local OOD profile. Review feedback should be stored from day one.
+Any later model refresh remains a separate, manually approved process;
+automatic retraining is disabled in this release.

@@ -4,6 +4,7 @@ import os
 from pathlib import Path
 
 import pytest
+import sklearn
 
 from fluoro_mvp_backend.inference import ImageModelScoreProvider
 
@@ -16,6 +17,19 @@ def test_manifest_declares_required_delivery_roles():
     assert manifest["primary_candidate"] == "ensemble_chexfound_head_plus_eva_x_base_last1_router"
     assert "eva_x_base_partial_unfreeze_last1" in manifest["single_model_candidates"]
     assert "chexfound_frozen_tuned_head_h512_do20_lr8e4_wd1e4" in manifest["single_model_candidates"]
+    assert manifest["runtime_contract"]["scikit_learn"] == "1.8.0"
+    assert manifest["automatic_retraining_enabled"] is False
+
+
+def test_production_calibrators_are_portable_and_legacy_pickles_are_absent():
+    calibration = ROOT / "model_bundle" / "calibration"
+    assert (calibration / "eva_last1_calibrator.json").exists()
+    assert (calibration / "chexfound_head_platt_calibrator.json").exists()
+    assert not (calibration / "eva_last1_calibrator.pkl").exists()
+    assert not (calibration / "chexfound_head_platt_calibrator.pkl").exists()
+    metadata = json.loads((calibration / "ood_artifact_metadata.json").read_text(encoding="utf-8"))
+    assert metadata["runtime"]["scikit_learn"] == sklearn.__version__ == "1.8.0"
+    assert all(item["gate_decision_changes"] == 0 for item in metadata["ood_models"])
 
 
 def test_manifest_artifact_files_exist_and_small_checksums_match():

@@ -63,6 +63,11 @@ A case is auto-cleared only when it passes all gates and the model-pair rule.
 ## Limitations
 
 - Backend image inference is implemented and real-data parity-smoked on local IN-CXR samples; customer-local data validation is still required before deployment.
+- The bundled OOD reference was fitted on IN-CXR. A new clinic/device requires
+  a locally fitted and approved OOD profile; high OOD rates must not be bypassed
+  by relaxing the threshold without validation.
 - Metrics are based on the available open dataset and should be revalidated on customer-local data before clinical use.
 - Edge cases near the auto-negative boundary should be prioritized for physician review and active learning.
+- Automatic retraining is disabled; feedback collection does not authorize a
+  model update or deployment.
 - The model is a decision-support component, not a standalone medical device.

@@ -2,7 +2,7 @@
   "project": "fluoro_mvp_mass_router_deployment_candidate",
   "candidate_role": "deployment_style_router_candidate",
   "deployment_ready_for_backend_adapter": true,
-  "why_not_direct_backend_ready": "Direct backend image inference is now implemented. Remaining hardening is customer-local validation plus production observability, not model-bundle wiring.",
+  "why_not_direct_backend_ready": "Direct image inference is implemented and research-router parity is locked. Clinical auto-negative use still requires a clinic-local OOD profile, local labeled validation, governance approval, and production observability.",
   "router_summary": {
     "rule": "pair_one_low_other_veto",
     "models": [
@@ -23,10 +23,8 @@
       "bytes": 346955507
     },
     "eva_last1_calibrator": {
-      "src": "selected_model_workbench/router_workbench/ensemble_candidate_bundle/calibration/last1_calibrator.pkl",
-      "dst": "selected_model_workbench/mass_router_meta_analysis/deployment_candidate_bundle/calibration/eva_last1_calibrator.pkl",
-      "mode": "hardlink",
-      "bytes": 4257
+      "path": "model_bundle/calibration/eva_last1_calibrator.json",
+      "format": "portable_json_v1"
     },
     "eva_ood_model": {
       "src": "selected_model_workbench/router_workbench/ensemble_candidate_bundle/best_ood_model.pkl",
@@ -41,10 +39,8 @@
       "bytes": 10946385
     },
     "chexfound_head_calibrator": {
-      "src": "CheXFound_frozen/posthoc_head_sweep_workbench/head_models/h512_do20_lr8e4_wd1e4_platt_calibrator.pkl",
-      "dst": "selected_model_workbench/mass_router_meta_analysis/deployment_candidate_bundle/calibration/chexfound_head_platt_calibrator.pkl",
-      "mode": "hardlink",
-      "bytes": 954
+      "path": "model_bundle/calibration/chexfound_head_platt_calibrator.json",
+      "format": "portable_json_v1"
     },
     "chexfound_ood_model": {
       "src": "CheXFound_frozen/best_ood_model.pkl",
@@ -91,11 +87,19 @@
       "filename": "eva_x_base_patch16_merged520k_mim.pt",
       "path": "model_bundle/models/eva_x/eva_x_base_patch16_merged520k_mim.pt",
       "purpose": "frozen EVA-X-B feature space for the deployed EVA OOD gate"
+    },
+    "ood_runtime_metadata": {
+      "path": "model_bundle/calibration/ood_artifact_metadata.json",
+      "format": "json"
+    },
+    "site_ood_policy": {
+      "path": "model_bundle/calibration/site_ood_policy.json",
+      "format": "json"
     }
   },
   "router_config_file": "reports/selected_mass_router_config.json",
   "created_from": "selected_model_workbench/mass_router_meta_analysis",
-  "delivery_bundle_version": "2026-06-24-v1",
+  "delivery_bundle_version": "2026-08-02-v2",
   "delivery_bundle_role": "backend_ready_candidate_bundle",
   "primary_candidate": "ensemble_chexfound_head_plus_eva_x_base_last1_router",
   "single_model_candidates": [
@@ -104,24 +108,34 @@
   ],
   "artifact_checksums": [
     {
-      "path": "model_bundle/calibration/chexfound_head_platt_calibrator.pkl",
-      "bytes": 954,
-      "sha256": "b5767af0bcee0f0bdccf12d641e0a485aa13ccd81007b971fcf8311bfd2651d0"
+      "path": "model_bundle/calibration/chexfound_head_platt_calibrator.json",
+      "bytes": 329,
+      "sha256": "baa8518a8911c14a4f360b0bc56c513df98e5fc770f7ffece356150a94158688"
     },
     {
       "path": "model_bundle/calibration/chexfound_ood_model.pkl",
-      "bytes": 159597316,
-      "sha256": "f110db69466c857f948083335ed0c1b3e56f7ab7646ab84a90f8992a0c9806d6"
+      "bytes": 159614851,
+      "sha256": "1754ce09f94453de042cfd2f16be3026e9d4770b03cd394f7c79d0cf72cf405e"
     },
     {
-      "path": "model_bundle/calibration/eva_last1_calibrator.pkl",
-      "bytes": 4257,
-      "sha256": "101fd94ce9cc6be085cd49a9613bc5c296953d73981e2805dcafbbc3d71a9bd0"
+      "path": "model_bundle/calibration/eva_last1_calibrator.json",
+      "bytes": 330,
+      "sha256": "f5e159413d96c0ce93761391be256f194e13b7b91a478f02f12c0e4c0a15ea42"
     },
     {
       "path": "model_bundle/calibration/eva_ood_model.pkl",
-      "bytes": 24830700,
-      "sha256": "64b28dfb33330f223cc22081a752fc4752370e1faeb6cc7a9d519d24dbf729b1"
+      "bytes": 24848595,
+      "sha256": "69d9de7d51ee684f42ddc18ec2c146a296134922e2f056d4f8738a4dff07ff06"
+    },
+    {
+      "path": "model_bundle/calibration/ood_artifact_metadata.json",
+      "bytes": 1212,
+      "sha256": "6a8d1225922040be0f24b8861b971c4e68a8d8fed842903da8d5fdcb1efe4dec"
+    },
+    {
+      "path": "model_bundle/calibration/site_ood_policy.json",
+      "bytes": 612,
+      "sha256": "d23897df21fef0ecc2c750262a8f9b05ffa87132b0473334ab53b3c0468d0bf4"
     },
     {
       "path": "model_bundle/external/CheXFound/LICENSE",
@@ -185,8 +199,8 @@
     },
     {
       "path": "model_bundle/preprocessing_config.json",
-      "bytes": 421,
-      "sha256": "2759250d83f483e535cd19b1ce52d5a3f1e27205c49339b782ddffb0ff52d299"
+      "bytes": 585,
+      "sha256": "54fb58569439d6a4bdac50ef0648f4527b7bae16524e5dea32c3a59af5a1b42f"
     },
     {
       "path": "model_bundle/reports/chexfound_candidate_fixed_final.csv",
@@ -263,5 +277,15 @@
     "smoke": "python3 tools/image_inference_smoke.py",
     "real_data_parity_smoke": "python3 tools/real_data_parity_smoke.py --data-root ../data/incxr_png/IN-CXR\\ \\(pre-processed\\)"
   },
-  "backend_adapter_status": "Full image adapter implemented and parity-smoked on local IN-CXR sample; customer-local validation remains before clinical rollout."
+  "backend_adapter_status": "Full image adapter implemented and parity-smoked on local IN-CXR sample; customer-local validation remains before clinical rollout.",
+  "clinical_deployment_status": "target_site_ood_validation_required",
+  "automatic_retraining_enabled": false,
+  "runtime_contract": {
+    "python": ">=3.11,<3.13",
+    "numpy": "2.0.2",
+    "scikit_learn": "1.8.0",
+    "joblib": "1.5.3",
+    "calibrator_format": "portable_json_v1",
+    "ood_format": "joblib_sklearn_1.8.0"
+  }
 }

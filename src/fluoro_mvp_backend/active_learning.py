@@ -38,10 +38,14 @@ def build_retraining_plan(
     min_feedback_for_run: int = 200,
     preferred_profile: str = "eva_base_partial_unfreeze_last1_refresh",
 ) -> dict[str, Any]:
-    ready = feedback_count >= min_feedback_for_run
+    enough_feedback = feedback_count >= min_feedback_for_run
     return {
-        "ready_for_retraining": ready,
+        "ready_for_retraining": False,
+        "automatic_retraining_enabled": False,
+        "execution_mode": "disabled_pending_legal_and_clinical_governance",
+        "review_data_sufficient": enough_feedback,
         "feedback_count": feedback_count,
         "min_feedback_for_run": min_feedback_for_run,
-        "recommended_profile": preferred_profile if ready else None,
+        "recommended_profile": preferred_profile if enough_feedback else None,
+        "next_step": "manual_legal_and_clinical_review" if enough_feedback else "continue_review_collection",
     }

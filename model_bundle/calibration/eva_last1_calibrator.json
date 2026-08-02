@@ -1,0 +1,17 @@
+{
+  "artifact_type": "probability_calibrator",
+  "coef": [
+    0.5120301049218592
+  ],
+  "intercept": -0.01771801221290559,
+  "method": "platt",
+  "ready": true,
+  "schema_version": 1,
+  "source_runtime": {
+    "numpy": "2.0.2",
+    "python": "3.11.9",
+    "scikit_learn": "1.8.0"
+  },
+  "x_thresholds": [],
+  "y_thresholds": []
+}

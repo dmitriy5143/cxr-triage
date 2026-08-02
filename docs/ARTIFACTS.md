@@ -6,28 +6,28 @@ blobs.
 
 Use release artifacts for the backend-ready model bundle:
 
-- `cxr-triage-eva-artifacts-v0.1.0.tar`
-- `cxr-triage-chexfound-artifacts-v0.1.0.tar`
+- `cxr-triage-eva-artifacts-v0.2.0.tar`
+- `cxr-triage-chexfound-artifacts-v0.2.0.tar`
 - `model_artifacts_sha256.json`
 
 For GitHub Release upload, the tar files may also be published as split parts:
 
-- `cxr-triage-eva-artifacts-v0.1.0.tar.part-aa`, `.part-ab`, ...
-- `cxr-triage-chexfound-artifacts-v0.1.0.tar.part-aa`, `.part-ab`, ...
+- `cxr-triage-eva-artifacts-v0.2.0.tar.part-aa`, `.part-ab`, ...
+- `cxr-triage-chexfound-artifacts-v0.2.0.tar.part-aa`, `.part-ab`, ...
 
 Reassemble split artifacts first:
 
 ```bash
-cat cxr-triage-eva-artifacts-v0.1.0.tar.part-* > cxr-triage-eva-artifacts-v0.1.0.tar
-cat cxr-triage-chexfound-artifacts-v0.1.0.tar.part-* > cxr-triage-chexfound-artifacts-v0.1.0.tar
+cat cxr-triage-eva-artifacts-v0.2.0.tar.part-* > cxr-triage-eva-artifacts-v0.2.0.tar
+cat cxr-triage-chexfound-artifacts-v0.2.0.tar.part-* > cxr-triage-chexfound-artifacts-v0.2.0.tar
 ```
 
 Both tar archives are extracted over the repository root:
 
 ```bash
 cd cxr-triage
-tar -xf /path/to/cxr-triage-eva-artifacts-v0.1.0.tar
-tar -xf /path/to/cxr-triage-chexfound-artifacts-v0.1.0.tar
+tar -xf /path/to/cxr-triage-eva-artifacts-v0.2.0.tar
+tar -xf /path/to/cxr-triage-chexfound-artifacts-v0.2.0.tar
 ```
 
 After extraction, verify that all required large artifacts match the manifest:
@@ -48,6 +48,11 @@ python3 tools/pack_model_artifacts.py
 
 The script writes archives into `release_artifacts/`. This directory is ignored
 by git and should be uploaded to a GitHub Release, not committed.
+
+Version `v0.2.0` replaces notebook-pickled calibrators with portable JSON
+calibration specs and refits both OOD artifacts under scikit-learn 1.8.0. The
+migration report in `model_bundle/calibration/ood_artifact_metadata.json`
+records zero OOD gate changes on the locked validation split.
 
 Git LFS can also be used later if the project has enough LFS quota, but release
 artifacts are safer for this bundle because the complete model payload is

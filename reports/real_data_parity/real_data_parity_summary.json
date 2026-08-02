@@ -2,12 +2,12 @@
   "n": 20,
   "auto_decision_matches": 20,
   "auto_decision_match_rate": 1.0,
-  "max_absdiff_p_chex_head": 0.011428955831451426,
-  "median_absdiff_p_chex_head": 0.0008760640361383061,
+  "max_absdiff_p_chex_head": 0.00022861248561859004,
+  "median_absdiff_p_chex_head": 1.0534257967949497e-05,
   "max_absdiff_p_last1": 2.980232238769531e-07,
-  "median_absdiff_p_last1": 8.890457814381136e-17,
-  "max_absdiff_ood_chex": 0.06574973229666137,
-  "median_absdiff_ood_chex": 0.01838212671252004,
+  "median_absdiff_p_last1": 2.3283073255844777e-10,
+  "max_absdiff_ood_chex": 0.006420430328588855,
+  "median_absdiff_ood_chex": 4.7262782240375945e-05,
   "max_absdiff_ood_eva": 3.7379512929369696e-08,
   "median_absdiff_ood_eva": 0.0
 }

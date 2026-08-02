@@ -1,5 +1,7 @@
 {
   "bundle_dir": "model_bundle",
+  "site_ood_dir": null,
+  "automatic_retraining_enabled": false,
   "router_config": "model_bundle/reports/selected_mass_router_config.json",
   "storage_url": "sqlite:///local_runs/feedback.sqlite",
   "log_level": "INFO",

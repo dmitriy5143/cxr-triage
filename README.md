@@ -16,6 +16,9 @@ Heavy model binaries are not committed as regular git blobs. Put them back into
 `model_bundle/` from the release archives described in
 [`docs/ARTIFACTS.md`](docs/ARTIFACTS.md).
 
+The `main` branch retains the reproducible research contour. The `production`
+branch contains the backend package without notebooks and exploratory scripts.
+
 ## Fixed MVP Candidate
 
 Primary deployment candidate:
@@ -48,6 +51,10 @@ Run tests from this folder:
 cd fluoro_mvp_delivery
 python3 -m pytest
 ```
+
+Production runtime is locked to Python 3.11/3.12, NumPy 2.0.2,
+scikit-learn 1.8.0, and the exact dependency versions in `pyproject.toml`.
+Python 3.13/3.14 is intentionally rejected until validated separately.
 
 The default test suite validates the code and score-router path. After
 extracting release artifacts, run the full artifact check:
@@ -106,6 +113,16 @@ uvicorn fluoro_mvp_backend.api:create_app --factory
 ```
 
 The CLI/API supports both score-router inference and full image inference. Full image inference is intentionally isolated behind `ImageModelScoreProvider` because it loads heavy EVA/CheXFound backbones. The bundle includes CheXFound HF safetensors, external EVA-X/CheXFound model code, and exposes artifact status through `/model/artifacts`.
+
+The packaged OOD models are the locked IN-CXR research reference. They are not
+silently treated as calibrated for a new device or clinic. Fit a local draft
+profile with `tools/fit_site_ood_profile.py`, validate it on held-out local data,
+and point `FLUORO_SITE_OOD_DIR` to the approved profile. Until then, shifted
+images are conservatively routed to `N/A`; `/model/artifacts` reports that the
+target-site clinical gate is not complete.
+
+Automatic retraining is disabled. The API stores review feedback and manual
+training-run records only; `/retraining/status` exposes the locked policy.
 
 CLI image inference:
 

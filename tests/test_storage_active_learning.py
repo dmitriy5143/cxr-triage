@@ -32,4 +32,7 @@ def test_active_learning_helpers():
     assert selected["study_id"].tolist() == ["b", "c"]
 
     plan = build_retraining_plan(feedback_count=250, min_feedback_for_run=200)
-    assert plan["ready_for_retraining"] is True
+    assert plan["review_data_sufficient"] is True
+    assert plan["ready_for_retraining"] is False
+    assert plan["automatic_retraining_enabled"] is False
+    assert plan["next_step"] == "manual_legal_and_clinical_review"

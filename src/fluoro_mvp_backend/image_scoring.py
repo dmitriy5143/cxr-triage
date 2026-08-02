@@ -11,7 +11,8 @@ from typing import Any
 import numpy as np
 from PIL import Image, ImageOps
 
-from .calibration import load_research_artifact
+from .calibration import calibrate_probabilities, load_portable_calibrator
+from .ood import load_ood_model, ood_profile_status, resolve_ood_artifact_dir, score_ood_model
 
 
 @dataclass(frozen=True)
@@ -48,6 +49,9 @@ class EnsembleImageScorer:
         raw, metadata, source_type = load_image_pixels(image_path)
         arr01 = robust_normalize(raw)
         quality_score, qa_flags, critical_qa = quality_checks(arr01, metadata)
+        profile = ood_profile_status(self.bundle_dir)
+        reference_profile_override = os.environ.get("FLUORO_ALLOW_REFERENCE_OOD_FOR_RESEARCH", "0") == "1"
+        ood_release_gate_passed = bool(profile["target_site_validated"] or reference_profile_override)
 
         chex = self.chex.score(arr01)
         eva = self.eva.score(arr01)
@@ -63,6 +67,9 @@ class EnsembleImageScorer:
             "critical_qa_bool": bool(critical_qa),
             "qa_flags": "|".join(qa_flags),
             "source_type": source_type,
+            "ood_profile_id": profile["profile_id"],
+            "target_site_ood_validated": profile["target_site_validated"],
+            "ood_release_gate_passed": ood_release_gate_passed,
         }
         preprocessing = {
             "original_shape": list(map(int, raw.shape)),
@@ -73,6 +80,8 @@ class EnsembleImageScorer:
             "metadata": metadata,
             "eva_image_size": int(self.eva.image_size),
             "chexfound_image_size": int(self.chex.image_size),
+            "ood_profile": profile,
+            "reference_profile_research_override": reference_profile_override,
         }
         return ImageScoreResult(scores=scores, preprocessing=preprocessing)
 
@@ -94,20 +103,31 @@ class EVAEndToEndScorer:
         torch, nn, _ = _torch_modules()
         self.bundle_dir = bundle_dir
         self.device = device
-        self.image_size = int(_preprocessing_config(bundle_dir).get("eva_image_size", 224))
+        preprocessing = _preprocessing_config(bundle_dir)
+        self.image_size = int(preprocessing.get("eva_image_size", 224))
         checkpoint_path = bundle_dir / "models" / "eva_base_partial_unfreeze_last1_best.pt"
-        calibrator_path = bundle_dir / "calibration" / "eva_last1_calibrator.pkl"
-        ood_path = bundle_dir / "calibration" / "eva_ood_model.pkl"
+        calibrator_path = bundle_dir / "calibration" / "eva_last1_calibrator.json"
+        ood_dir = resolve_ood_artifact_dir(bundle_dir)
+        ood_path = ood_dir / "eva_ood_model.pkl"
         if not checkpoint_path.exists():
             raise FileNotFoundError(f"EVA-X checkpoint not found: {checkpoint_path}")
         self.model = load_eva_end_to_end_model(bundle_dir, checkpoint_path, device=device).eval()
         self.ood_encoder = load_eva_frozen_encoder(bundle_dir, device=device).eval()
-        self.calibrator = load_research_artifact(calibrator_path)
-        self.ood_model = load_research_artifact(ood_path)
+        self.calibrator = load_portable_calibrator(calibrator_path)
+        self.ood_model = load_ood_model(ood_path)
         self.torch = torch
         self.nn = nn
 
     def score(self, arr01: np.ndarray) -> dict[str, float]:
+        raw, feature_np = self.extract_outputs(arr01)
+        p = _calibrate(self.calibrator, raw)
+        return {
+            "p_raw": float(raw[0]),
+            "p_calibrated": float(p[0]),
+            "ood_score": float(score_ood_model(self.ood_model, feature_np)[0]),
+        }
+
+    def extract_outputs(self, arr01: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
         torch = self.torch
         x = image_to_eva_tensor(arr01, self.image_size).unsqueeze(0).to(self.device)
         with torch.no_grad():
@@ -116,12 +136,7 @@ class EVAEndToEndScorer:
                 features = encode_eva_features(self.ood_encoder, x)
             raw = torch.sigmoid(logits).detach().float().cpu().numpy()
             feature_np = features.detach().float().cpu().numpy().astype(np.float32)
-        p = _calibrate(self.calibrator, raw)
-        return {
-            "p_raw": float(raw[0]),
-            "p_calibrated": float(p[0]),
-            "ood_score": float(ood_score(self.ood_model, feature_np)[0]),
-        }
+        return raw.astype(np.float32), feature_np
 
 
 class CheXFoundFrozenHeadScorer:
@@ -129,17 +144,35 @@ class CheXFoundFrozenHeadScorer:
         torch, nn, _ = _torch_modules()
         self.bundle_dir = bundle_dir
         self.device = device
-        self.image_size = 512
+        preprocessing = _preprocessing_config(bundle_dir)
+        self.image_size = int(preprocessing.get("chexfound_image_size", 512))
+        self.letterbox_size = int(preprocessing.get("chexfound_letterbox_size", 1024))
         self.backbone = load_chexfound_backbone(bundle_dir, device=device).eval()
         self.head, self.scaler_mean, self.scaler_scale = load_chexfound_head(bundle_dir, device=device)
-        self.calibrator = load_research_artifact(bundle_dir / "calibration" / "chexfound_head_platt_calibrator.pkl")
-        self.ood_model = load_research_artifact(bundle_dir / "calibration" / "chexfound_ood_model.pkl")
+        self.calibrator = load_portable_calibrator(
+            bundle_dir / "calibration" / "chexfound_head_platt_calibrator.json"
+        )
+        ood_dir = resolve_ood_artifact_dir(bundle_dir)
+        self.ood_model = load_ood_model(ood_dir / "chexfound_ood_model.pkl")
         self.torch = torch
         self.nn = nn
 
     def score(self, arr01: np.ndarray) -> dict[str, float]:
+        raw, feature_np = self.extract_outputs(arr01)
+        p = _calibrate(self.calibrator, raw)
+        return {
+            "p_raw": float(raw[0]),
+            "p_calibrated": float(p[0]),
+            "ood_score": float(score_ood_model(self.ood_model, feature_np)[0]),
+        }
+
+    def extract_outputs(self, arr01: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
         torch = self.torch
-        x = image_to_chexfound_tensor(arr01, self.image_size).unsqueeze(0).to(self.device)
+        x = image_to_chexfound_tensor(
+            arr01,
+            self.image_size,
+            letterbox_size=self.letterbox_size,
+        ).unsqueeze(0).to(self.device)
         with torch.no_grad():
             with _autocast_context(torch, self.device):
                 outputs = self.backbone.get_intermediate_layers(x, n=4, return_class_token=True)
@@ -148,12 +181,7 @@ class CheXFoundFrozenHeadScorer:
                 logits = self.head(z)
             raw = torch.sigmoid(logits).detach().float().cpu().numpy()
             feature_np = features.detach().float().cpu().numpy().astype(np.float32)
-        p = _calibrate(self.calibrator, raw)
-        return {
-            "p_raw": float(raw[0]),
-            "p_calibrated": float(p[0]),
-            "ood_score": float(ood_score(self.ood_model, feature_np)[0]),
-        }
+        return raw.astype(np.float32), feature_np
 
 
 def load_eva_end_to_end_model(bundle_dir: Path, checkpoint_path: Path, *, device: str):
@@ -393,12 +421,28 @@ def load_image_pixels(path: str | Path) -> tuple[np.ndarray, dict[str, Any], str
         photometric = str(getattr(ds, "PhotometricInterpretation", "")).upper()
         if photometric == "MONOCHROME1":
             arr = arr.max() - arr
+        wc = getattr(ds, "WindowCenter", None)
+        ww = getattr(ds, "WindowWidth", None)
+        if wc is not None and ww is not None:
+            wc_value = float(_first_value(wc))
+            ww_value = float(_first_value(ww))
+            lo, hi = wc_value - ww_value / 2.0, wc_value + ww_value / 2.0
+            if hi > lo:
+                arr = np.clip(arr, lo, hi)
         metadata = {
             "rows": int(getattr(ds, "Rows", arr.shape[0])),
             "columns": int(getattr(ds, "Columns", arr.shape[1])),
             "modality": str(getattr(ds, "Modality", "")),
             "view_position": str(getattr(ds, "ViewPosition", "")),
             "photometric_interpretation": photometric,
+            "bits_allocated": _optional_int(getattr(ds, "BitsAllocated", None)),
+            "bits_stored": _optional_int(getattr(ds, "BitsStored", None)),
+            "high_bit": _optional_int(getattr(ds, "HighBit", None)),
+            "pixel_representation": _optional_int(getattr(ds, "PixelRepresentation", None)),
+            "rescale_slope": slope,
+            "rescale_intercept": intercept,
+            "window_center": _optional_float(wc),
+            "window_width": _optional_float(ww),
         }
         return arr, metadata, "dicom"
 
@@ -471,10 +515,12 @@ def image_to_eva_tensor(arr01: np.ndarray, image_size: int):
     return torch.tensor((rgb - 0.5) / 0.5, dtype=torch.float32)
 
 
-def image_to_chexfound_tensor(arr01: np.ndarray, image_size: int):
+def image_to_chexfound_tensor(arr01: np.ndarray, image_size: int, *, letterbox_size: int = 1024):
     torch, _, _ = _torch_modules()
-    arr = resize_pad_array(arr01, image_size)
-    x = np.repeat(arr[None, :, :], 3, axis=0).astype(np.float32)
+    padded = resize_pad_array(arr01, letterbox_size)
+    img = Image.fromarray((np.clip(padded, 0, 1) * 255).astype(np.uint8), mode="L").convert("RGB")
+    img = img.resize((image_size, image_size), Image.Resampling.BICUBIC)
+    x = np.asarray(img, dtype=np.float32).transpose(2, 0, 1) / 255.0
     lo = x.reshape(3, -1).min(axis=1).reshape(3, 1, 1)
     hi = x.reshape(3, -1).max(axis=1).reshape(3, 1, 1)
     x = (x - lo) / np.maximum(hi - lo, 1e-6)
@@ -483,25 +529,29 @@ def image_to_chexfound_tensor(arr01: np.ndarray, image_size: int):
     return torch.tensor((x - mean) / std, dtype=torch.float32)
 
 
-def ood_score(model: dict[str, Any], X: np.ndarray) -> np.ndarray:
-    required = {"scaler", "nn", "ref95", "iso", "iso_p5", "iso_p95"}
-    missing = sorted(required.difference(model))
-    if missing:
-        raise ValueError(f"OOD model is incomplete; missing fields: {missing}")
-    Xs = model["scaler"].transform(X)
-    dists, _ = model["nn"].kneighbors(Xs)
-    knn = dists[:, -1] / max(float(model["ref95"]), 1e-6)
-    iso_raw = -model["iso"].score_samples(Xs)
-    iso = (iso_raw - float(model["iso_p5"])) / max(float(model["iso_p95"]) - float(model["iso_p5"]), 1e-6)
-    return np.clip(0.5 * knn + 0.5 * iso, 0, 2)
-
-
 def _calibrate(calibrator: Any, p: np.ndarray) -> np.ndarray:
-    if calibrator is None:
-        return np.asarray(p, dtype=np.float32)
-    if hasattr(calibrator, "transform"):
-        return np.asarray(calibrator.transform(p), dtype=np.float32)
-    return np.asarray(p, dtype=np.float32)
+    return calibrate_probabilities(calibrator, p)
+
+
+def _first_value(value: Any) -> Any:
+    try:
+        if hasattr(value, "__iter__") and not isinstance(value, (str, bytes)):
+            return list(value)[0]
+    except Exception:
+        pass
+    return value
+
+
+def _optional_float(value: Any) -> float | None:
+    if value is None:
+        return None
+    return float(_first_value(value))
+
+
+def _optional_int(value: Any) -> int | None:
+    if value is None:
+        return None
+    return int(_first_value(value))
 
 
 def _preprocessing_config(bundle_dir: Path) -> dict[str, Any]:

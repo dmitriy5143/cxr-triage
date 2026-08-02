@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "profile_id": "reference-incxr-v1",
+  "status": "reference_only_target_site_validation_required",
+  "reference_dataset": "IN-CXR preprocessed PNG mirror",
+  "default_router_action_for_ood": "N/A",
+  "target_site_profile_required_before_clinical_auto_negative": true,
+  "site_profile_environment_variable": "FLUORO_SITE_OOD_DIR",
+  "notes": [
+    "The packaged OOD models are valid for the locked research distribution.",
+    "A clinic-local profile must be fitted and clinically reviewed before deployment.",
+    "No OOD threshold fallback or automatic acceptance is permitted."
+  ]
+}

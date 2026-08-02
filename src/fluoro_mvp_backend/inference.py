@@ -7,6 +7,7 @@ from typing import Any
 import pandas as pd
 from safetensors import safe_open
 
+from .ood import ood_profile_status, resolve_ood_artifact_dir
 from .router import load_router_config, route_record
 from .schemas import ScorePayload
 
@@ -76,6 +77,7 @@ class ImageModelScoreProvider:
         eva_frozen_weights = self.bundle_dir / "models" / "eva_x" / "eva_x_base_patch16_merged520k_mim.pt"
         eva_code = self.bundle_dir / "external" / "EVA-X" / "eva_x.py"
         chex_code = self.bundle_dir / "external" / "CheXFound" / "chexfound" / "models" / "vision_transformer.py"
+        ood_dir = resolve_ood_artifact_dir(self.bundle_dir)
         status = {
             "chexfound_hf_model_safetensors": _file_status(chex_weights),
             "chexfound_hf_config": _file_status(chex_config),
@@ -85,9 +87,18 @@ class ImageModelScoreProvider:
             "eva_x_base_last1_checkpoint": _file_status(eva_checkpoint),
             "eva_x_base_frozen_ood_weights": _file_status(eva_frozen_weights),
             "router_config": _file_status(self.bundle_dir / "reports" / "selected_mass_router_config.json"),
+            "eva_calibrator": _file_status(self.bundle_dir / "calibration" / "eva_last1_calibrator.json"),
+            "chexfound_calibrator": _file_status(
+                self.bundle_dir / "calibration" / "chexfound_head_platt_calibrator.json"
+            ),
+            "eva_ood_model": _file_status(ood_dir / "eva_ood_model.pkl"),
+            "chexfound_ood_model": _file_status(ood_dir / "chexfound_ood_model.pkl"),
+            "ood_runtime_metadata": _file_status(ood_dir / "ood_artifact_metadata.json"),
         }
         status["full_image_adapter_wired"] = all(item["exists"] for item in status.values() if isinstance(item, dict))
         status["ready_for_score_router"] = status["router_config"]["exists"]
+        status["ood_profile"] = ood_profile_status(self.bundle_dir)
+        status["clinical_auto_negative_ready"] = status["ood_profile"]["clinical_auto_negative_ready"]
         return status
 
     def validate_chexfound_safetensors_header(self) -> dict[str, Any]:

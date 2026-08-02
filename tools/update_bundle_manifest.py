@@ -59,6 +59,11 @@ def main() -> int:
         "path": "model_bundle/calibration/site_ood_policy.json",
         "format": "json",
     }
+    files["eva_ood_model"]["bytes"] = (BUNDLE / "calibration" / "eva_ood_model.pkl").stat().st_size
+    files["chexfound_ood_model"]["bytes"] = (
+        BUNDLE / "calibration" / "chexfound_ood_model.pkl"
+    ).stat().st_size
+    files["preprocessing_config"]["bytes"] = (BUNDLE / "preprocessing_config.json").stat().st_size
 
     checksum_paths = {
         *BUNDLE.joinpath("calibration").glob("*"),

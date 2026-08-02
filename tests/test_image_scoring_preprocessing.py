@@ -8,7 +8,9 @@ from fluoro_mvp_backend.image_scoring import (
     image_to_chexfound_tensor,
     load_image_pixels,
     resize_pad_array,
+    robust_normalize,
 )
+from fluoro_mvp_backend.preprocessing import preprocess_image
 
 
 def test_chexfound_tensor_uses_research_two_stage_resize():
@@ -86,3 +88,17 @@ def test_load_monochrome1_dicom_inverts_pixels(tmp_path):
     expected = np.clip(rescaled.max() - rescaled, 500.0, 1500.0)
     np.testing.assert_array_equal(arr, expected)
     assert metadata["photometric_interpretation"] == "MONOCHROME1"
+
+
+def test_preprocessing_service_uses_shared_dicom_contract(tmp_path):
+    pixels = np.arange(256 * 512, dtype=np.uint16).reshape(256, 512) % 1501
+    path = tmp_path / "shared_contract.dcm"
+    _write_dicom(path, pixels)
+
+    raw, _, _ = load_image_pixels(path)
+    expected = resize_pad_array(robust_normalize(raw), 224)
+    actual = preprocess_image(path, image_size=224)
+
+    np.testing.assert_array_equal(actual.image, expected)
+    assert actual.original_size == (512, 256)
+    assert actual.target_size == 224

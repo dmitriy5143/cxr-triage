@@ -30,7 +30,7 @@
       "src": "selected_model_workbench/router_workbench/ensemble_candidate_bundle/best_ood_model.pkl",
       "dst": "selected_model_workbench/mass_router_meta_analysis/deployment_candidate_bundle/calibration/eva_ood_model.pkl",
       "mode": "hardlink",
-      "bytes": 24830700
+      "bytes": 24848595
     },
     "chexfound_head": {
       "src": "CheXFound_frozen/posthoc_head_sweep_workbench/head_models/h512_do20_lr8e4_wd1e4.pt",
@@ -46,13 +46,13 @@
       "src": "CheXFound_frozen/best_ood_model.pkl",
       "dst": "selected_model_workbench/mass_router_meta_analysis/deployment_candidate_bundle/calibration/chexfound_ood_model.pkl",
       "mode": "hardlink",
-      "bytes": 159597316
+      "bytes": 159614851
     },
     "preprocessing_config": {
       "src": "selected_model_workbench/router_workbench/ensemble_candidate_bundle/preprocessing_config.json",
       "dst": "selected_model_workbench/mass_router_meta_analysis/deployment_candidate_bundle/preprocessing_config.json",
       "mode": "hardlink",
-      "bytes": 421
+      "bytes": 585
     },
     "chexfound_hf_snapshot": {
       "repo_id": "DIAL-RPI/CheXFound",
@@ -71,7 +71,8 @@
         "eva_x_py": "model_bundle/external/EVA-X/eva_x.py",
         "license": "model_bundle/external/EVA-X/LICENSE.txt",
         "readme": "model_bundle/external/EVA-X/README.md"
-      }
+      },
+      "scope": "minimal_inference_source_and_license"
     },
     "chexfound_source_snapshot": {
       "source": "https://github.com/RPIDIAL/CheXFound",
@@ -80,7 +81,8 @@
         "vision_transformer": "model_bundle/external/CheXFound/chexfound/models/vision_transformer.py",
         "license": "model_bundle/external/CheXFound/LICENSE",
         "readme": "model_bundle/external/CheXFound/README.md"
-      }
+      },
+      "scope": "minimal_inference_source_and_license"
     },
     "eva_x_base_frozen_ood_weights": {
       "source": "MapleF/eva_x",

@@ -1,61 +1,11 @@
 from __future__ import annotations
 
 import json
-import sys
-import types
 from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Any
 
-import joblib
 import numpy as np
-from sklearn.isotonic import IsotonicRegression
-from sklearn.linear_model import LogisticRegression
-
-
-class ProbabilityCalibrator:
-    """Compatibility class for calibrators saved by the research notebooks."""
-
-    def __init__(self, method: str = "platt"):
-        self.method = method
-        self.model: Any | None = None
-        self.ready = False
-
-    def fit(self, p: np.ndarray, y: np.ndarray) -> "ProbabilityCalibrator":
-        p = np.clip(np.asarray(p), 1e-5, 1 - 1e-5)
-        y = np.asarray(y).astype(int)
-        if self.method in {"none", "identity", "raw"}:
-            self.ready = False
-            return self
-        if len(y) < 4 or len(np.unique(y)) != 2:
-            self.ready = False
-            return self
-        if self.method == "platt":
-            logits = np.log(p / (1 - p)).reshape(-1, 1)
-            self.model = LogisticRegression(max_iter=1000)
-            self.model.fit(logits, y)
-            self.ready = True
-        elif self.method == "isotonic":
-            self.model = IsotonicRegression(out_of_bounds="clip", y_min=0.0, y_max=1.0)
-            self.model.fit(p, y)
-            self.ready = True
-        else:
-            raise ValueError(f"Unknown calibration method: {self.method!r}")
-        return self
-
-    def transform(self, p: np.ndarray | list[float] | float) -> np.ndarray:
-        p = np.clip(np.asarray(p, dtype=np.float32), 1e-5, 1 - 1e-5)
-        if not self.ready or self.model is None:
-            return p.astype(np.float32)
-        if self.method == "isotonic":
-            return np.asarray(self.model.predict(p), dtype=np.float32)
-        logits = np.log(p / (1 - p)).reshape(-1, 1)
-        return self.model.predict_proba(logits)[:, 1].astype(np.float32)
-
-
-class PlattCalibrator(ProbabilityCalibrator):
-    def __init__(self) -> None:
-        super().__init__(method="platt")
 
 
 @dataclass(frozen=True)
@@ -124,86 +74,15 @@ class PortableCalibrator:
         raise ValueError(f"Unsupported calibration method: {self.method!r}")
 
 
-def portable_calibrator_from_legacy(
-    calibrator: Any,
-    *,
-    source_runtime: dict[str, str] | None = None,
-) -> PortableCalibrator:
-    """Extract only calibration mathematics from a notebook-era object."""
-
-    method = str(getattr(calibrator, "method", "identity")).lower()
-    ready = bool(getattr(calibrator, "ready", False))
-    model = getattr(calibrator, "model", None)
-    if not ready or model is None:
-        return PortableCalibrator(1, "probability_calibrator", method, False, source_runtime=source_runtime)
-    if method == "platt":
-        coef = np.asarray(model.coef_, dtype=np.float64).reshape(-1)
-        intercept = np.asarray(model.intercept_, dtype=np.float64).reshape(-1)
-        classes = np.asarray(model.classes_).reshape(-1)
-        if coef.size != 1 or intercept.size != 1 or classes.tolist() != [0, 1]:
-            raise ValueError("Only binary [0, 1] Platt calibrators are supported.")
-        return PortableCalibrator(
-            1,
-            "probability_calibrator",
-            "platt",
-            True,
-            coef=(float(coef[0]),),
-            intercept=float(intercept[0]),
-            source_runtime=source_runtime,
-        )
-    if method == "isotonic":
-        return PortableCalibrator(
-            1,
-            "probability_calibrator",
-            "isotonic",
-            True,
-            x_thresholds=tuple(float(v) for v in np.asarray(model.X_thresholds_).reshape(-1)),
-            y_thresholds=tuple(float(v) for v in np.asarray(model.y_thresholds_).reshape(-1)),
-            source_runtime=source_runtime,
-        )
-    raise ValueError(f"Unsupported legacy calibration method: {method!r}")
-
-
 def calibrate_probabilities(calibrator: Any, p: np.ndarray | list[float] | float) -> np.ndarray:
-    """Calibrate without invoking notebook-serialized ``transform`` bytecode."""
+    """Apply the version-neutral production calibration contract."""
 
     values = np.clip(np.asarray(p, dtype=np.float32), 1e-5, 1 - 1e-5)
-    if calibrator is None or not bool(getattr(calibrator, "ready", False)):
+    if calibrator is None:
         return values
     if isinstance(calibrator, PortableCalibrator):
         return calibrator.transform(values)
-
-    model = getattr(calibrator, "model", None)
-    if model is None:
-        return values
-    method = str(getattr(calibrator, "method", "platt")).lower()
-    if method == "isotonic":
-        return np.asarray(model.predict(values), dtype=np.float32)
-    if method == "platt":
-        logits = np.log(values / (1 - values)).reshape(-1, 1)
-        return np.asarray(model.predict_proba(logits)[:, 1], dtype=np.float32)
-    raise ValueError(f"Unsupported calibration method: {method!r}")
-
-
-def install_research_pickle_shims() -> None:
-    """Expose notebook-era class names before loading joblib/pickle artifacts."""
-
-    shim = sys.modules.get("fluoro_mvp_core")
-    if shim is None:
-        shim = types.ModuleType("fluoro_mvp_core")
-        sys.modules["fluoro_mvp_core"] = shim
-    setattr(shim, "ProbabilityCalibrator", ProbabilityCalibrator)
-    setattr(shim, "PlattCalibrator", PlattCalibrator)
-
-    main = sys.modules.get("__main__")
-    if main is not None:
-        setattr(main, "ProbabilityCalibrator", ProbabilityCalibrator)
-        setattr(main, "PlattCalibrator", PlattCalibrator)
-
-
-def load_research_artifact(path: str | Path) -> Any:
-    install_research_pickle_shims()
-    return joblib.load(path)
+    raise TypeError("Production calibration accepts PortableCalibrator artifacts only.")
 
 
 def load_portable_calibrator(path: str | Path) -> PortableCalibrator:

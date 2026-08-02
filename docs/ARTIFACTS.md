@@ -1,8 +1,8 @@
 # Model Artifacts
 
-The repository keeps code, tests, configs, reports, notebooks, and checksums in
-git. Heavy binary model artifacts are intentionally not committed as regular git
-blobs.
+The production branch keeps runtime code, tests, configs, locked reports, and
+checksums in git. Heavy binary model artifacts are intentionally not committed
+as regular git blobs.
 
 Use release artifacts for the backend-ready model bundle:
 

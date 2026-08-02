@@ -28,7 +28,6 @@ It now includes the direct image scorer adapter that wires preprocessing into bo
 | Review feedback storage | Done and tested | `/review-feedback`, `review_feedback` table |
 | Review/active-learning data contour | Done as feedback storage + review queue helpers | `src/fluoro_mvp_backend/active_learning.py` |
 | Automatic/scheduled retraining | Intentionally disabled | `/retraining/status`, legal and clinical governance required |
-| Research code transfer | Done | copied notebooks/scripts match originals byte-for-byte |
 | Model card / MVP report | Done | `docs/MODEL_CARD.md`, `docs/MVP_REPORT.md` |
 | Fresh environment smoke test | Done | `tools/fresh_env_smoke.py` |
 | Real-data image parity smoke | Done on 20 local IN-CXR cases | `reports/real_data_parity/real_data_parity_summary.json` |

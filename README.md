@@ -1,14 +1,13 @@
 # Fluoro MVP Delivery
 
-This folder is the backend-ready delivery package for the current FLG/CXR MVP candidate.
+This branch is the production-only backend package for the current FLG/CXR MVP candidate.
 
 It contains:
 
 - `model_bundle/` - selected candidate artifacts, calibrators, router config, reports, and checksums.
 - `src/fluoro_mvp_backend/` - backend-facing preprocessing, routing, inference boundary, CLI, API skeleton, logging, feedback, and active-learning storage.
 - `tests/` - regression tests that verify artifact integrity and prevent router drift against the research outputs.
-- `research/` - notebooks and scripts used to reproduce the model-selection and interpretation contour.
-- `docs/` - model card, MVP report, backend plan, and reproducibility notes.
+- `docs/` - model card, MVP report, backend plan, runtime contract, and site onboarding.
 - `runtime/` - local SQLite runtime data, initialized by `tools/init_db.py`.
 - `.env.example` - environment-variable template for local/API deployment.
 
@@ -16,8 +15,8 @@ Heavy model binaries are not committed as regular git blobs. Put them back into
 `model_bundle/` from the release archives described in
 [`docs/ARTIFACTS.md`](docs/ARTIFACTS.md).
 
-The `main` branch retains the reproducible research contour. The `production`
-branch contains the backend package without notebooks and exploratory scripts.
+The reproducible notebooks and exploratory scripts remain on `main` and are
+intentionally absent from this branch.
 
 ## Fixed MVP Candidate
 
@@ -136,4 +135,7 @@ PYTHONPATH=src python3 -m fluoro_mvp_backend.cli \
 
 ## Why This Shape
 
-The research notebooks are excellent for experimentation, but the backend needs a smaller, testable boundary. The core production decision is the router, so this package freezes the selected router and adds tests that replay the research final-test score table. If a future code change alters the 125 selected auto-negative cases, tests fail.
+The production package has one shared image-loading/QA contract, versioned model
+artifacts, and a fixed router. Regression tests replay the locked final-test
+score table; if a code change alters the 125 reference auto-negative cases, the
+build fails.

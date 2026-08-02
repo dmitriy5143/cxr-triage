@@ -5,7 +5,6 @@ from pathlib import Path
 from typing import Any
 
 import numpy as np
-from PIL import Image, ImageOps
 
 
 @dataclass(frozen=True)
@@ -33,38 +32,19 @@ def load_preprocessing_config(bundle_dir: str | Path) -> dict[str, Any]:
 
 
 def preprocess_image(image_path: str | Path, image_size: int = 224) -> PreprocessOutput:
-    """Load and normalize one radiograph-like image for model adapters.
+    """Run the shared production image loading, QA, and resize contract."""
 
-    This lightweight backend preprocessing intentionally mirrors the MVP
-    inference contract: grayscale conversion, aspect-preserving resize, center
-    crop/pad, and stable 0..1 normalization. Research notebooks remain the
-    source of truth for dataset-wide QA and training-time preprocessing.
-    """
+    from .image_scoring import load_image_pixels, quality_checks, resize_pad_array, robust_normalize
 
     path = Path(image_path)
     if not path.exists():
         raise FileNotFoundError(f"Image was not found: {path}")
 
-    img = Image.open(path)
-    img = ImageOps.exif_transpose(img).convert("L")
-    original_size = img.size
-    flags: list[str] = []
-
-    if min(original_size) < 128:
-        flags.append("low_resolution")
-    if max(original_size) / max(1, min(original_size)) > 3.0:
-        flags.append("extreme_aspect_ratio")
-
-    img = ImageOps.contain(img, (image_size, image_size), method=Image.Resampling.BICUBIC)
-    canvas = Image.new("L", (image_size, image_size), color=0)
-    offset = ((image_size - img.width) // 2, (image_size - img.height) // 2)
-    canvas.paste(img, offset)
-
-    arr = np.asarray(canvas, dtype=np.float32) / 255.0
-    quality_score = 0.75
-    if flags:
-        quality_score = 0.5 if "low_resolution" in flags else 0.65
-    critical_qa = False
+    raw, metadata, _ = load_image_pixels(path)
+    normalized = robust_normalize(raw)
+    quality_score, flags, critical_qa = quality_checks(normalized, metadata)
+    arr = resize_pad_array(normalized, image_size)
+    original_size = (int(raw.shape[1]), int(raw.shape[0]))
     return PreprocessOutput(
         image=arr,
         quality_score=quality_score,
